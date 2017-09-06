@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016  RasPi Check Contributors
+ * Copyright (C) 2017  RasPi Check Contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ public class CursorHelper {
         command.setName(c.getString(1));
         command.setCommand(c.getString(2));
         command.setShowOutput(c.getInt(3) == 1 ? true : false);
+        command.setTimeout(c.getInt(4));
         return command;
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016  RasPi Check Contributors
+ * Copyright (C) 2017  RasPi Check Contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -730,6 +730,11 @@ public class RaspiQuery implements IQueryService {
         }
     }
 
+    @Override
+    public String querySystemtime() throws RaspiQueryException {
+        return QueryFactory.makeSystemTimeQuery(client).run();
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -792,20 +797,25 @@ public class RaspiQuery implements IQueryService {
                     final String rebootCmdLogger = "echo \"??SUDO_PW??\" | sudo -S /sbin/shutdown -r now";
                     LOGGER.info("Sending reboot command: {}", rebootCmdLogger);
                     Command cmd = session.exec(command);
-                    cmd.join();
-                    session.close();
+                    try {
+                        cmd.join();
+                        session.join();
+                    } catch (ConnectionException e) {
+                        LOGGER.debug("ConnectException while sending reboot command. Probably system is going down...", e);
+                        return;
+                    }
                     if (cmd.getExitStatus() != null && cmd.getExitStatus() != 0) {
                         LOGGER.warn("Sudo unknown: Trying \"reboot\"...");
                         // openelec running
                         session = client.startSession();
                         session.allocateDefaultPTY();
-                        session.exec("reboot");
+                        cmd = session.exec("reboot");
                         try {
-                            session.join(250, TimeUnit.MILLISECONDS);
+                            cmd.join();
                             LOGGER.debug("join successful after 'reboot'.");
                         } catch (ConnectionException e) {
                             // system went down
-                            LOGGER.debug("'reboot' successful!");
+                            LOGGER.debug("ConnectException while sending reboot command. Probably system is going down...", e);
                         }
                     }
                 } catch (IOException e) {
@@ -850,20 +860,25 @@ public class RaspiQuery implements IQueryService {
                     final String haltCmdLogger = "echo \"??SUDO_PW??\" | sudo -S /sbin/shutdown -h now";
                     LOGGER.info("Sending halt command: {}", haltCmdLogger);
                     Command cmd = session.exec(command);
-                    cmd.join();
-                    session.close();
+                    try {
+                        cmd.join();
+                        session.join();
+                    } catch (ConnectionException e) {
+                        LOGGER.debug("ConnectException while sending halt command. Probably system is going down...", e);
+                        return;
+                    }
                     if (cmd.getExitStatus() != null && cmd.getExitStatus() != 0) {
                         // openelec running
                         session = client.startSession();
                         session.allocateDefaultPTY();
                         LOGGER.warn("Sudo unknown: Trying \"halt\"...");
-                        session.exec("halt");
+                        cmd = session.exec("halt");
                         try {
-                            session.join(250, TimeUnit.MILLISECONDS);
-                            LOGGER.debug("'halt' probably didnt work.");
+                            cmd.join();
+                            LOGGER.debug("join successful after 'halt'.");
                         } catch (ConnectionException e) {
                             // system went down
-                            LOGGER.debug("'halt' successful!");
+                            LOGGER.debug("ConnectException while sending halt command. Probably system is going down...", e);
                         }
                     }
                 } catch (IOException e) {
@@ -953,6 +968,12 @@ public class RaspiQuery implements IQueryService {
             // split string at whitespaces
             final String[] linesSplitted = line.split("\\s+");
             if (linesSplitted.length >= 6) {
+                String filesystem = linesSplitted[0];
+                String size = linesSplitted[1];
+                String used = linesSplitted[2];
+                String free = linesSplitted[3];
+                String usedPercentage = linesSplitted[4];
+                String mountpoint = linesSplitted[5];
                 if (linesSplitted.length > 6) {
                     // whitespace in mountpoint path
                     StringBuilder sb = new StringBuilder();
@@ -962,21 +983,21 @@ public class RaspiQuery implements IQueryService {
                             sb.append(" ");
                         }
                     }
-                    disks.add(new DiskUsageBean(linesSplitted[0],
-                            linesSplitted[1], linesSplitted[2],
-                            linesSplitted[3], linesSplitted[4], sb.toString()));
-                } else {
-                    disks.add(new DiskUsageBean(linesSplitted[0],
-                            linesSplitted[1], linesSplitted[2],
-                            linesSplitted[3], linesSplitted[4],
-                            linesSplitted[5]));
+                    mountpoint = sb.toString();
                 }
+                if (filesystem.length() > 20) {
+                    // shorten filesystem
+                    LOGGER.debug("Shorten filesystem: {}", filesystem);
+                    filesystem = ".." + filesystem.substring(filesystem.length() - 21, filesystem.length());
+                }
+                disks.add(new DiskUsageBean(filesystem, size, used, free, usedPercentage, mountpoint));
             } else {
                 LOGGER.warn(
                         "Expected another output of df -h. Skipping line: {}",
                         line);
             }
         }
+        LOGGER.debug("Disks: {}", disks);
         return disks;
     }
 
@@ -1202,7 +1223,7 @@ public class RaspiQuery implements IQueryService {
      * @see de.eidottermihi.rpicheck.ssh.IQueryService#run(java.lang.String)
      */
     @Override
-    public String run(String command) throws RaspiQueryException {
+    public String run(String command, int timeout) throws RaspiQueryException {
         LOGGER.info("Running custom command: {}", command);
         if (client != null) {
             if (client.isConnected() && client.isAuthenticated()) {
@@ -1211,7 +1232,7 @@ public class RaspiQuery implements IQueryService {
                     session = client.startSession();
                     session.allocateDefaultPTY();
                     final Command cmd = session.exec(command);
-                    cmd.join(20, TimeUnit.SECONDS);
+                    cmd.join(timeout, TimeUnit.SECONDS);
                     cmd.close();
                     final String output = IOUtils.readFully(
                             cmd.getInputStream()).toString();

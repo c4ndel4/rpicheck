@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016  RasPi Check Contributors
+ * Copyright (C) 2017  RasPi Check Contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements
     public static final String KEY_PREF_QUERY_HIDE_ROOT_PROCESSES = "pref_query_hide_root";
     public static final String KEY_PREF_FREQUENCY_UNIT = "pref_frequency_unit";
     public static final String KEY_PREF_DEBUG_LOGGING = "pref_debug_log";
+    public static final String KEY_PREF_QUERY_SHOW_SYSTEM_TIME = "pref_query_show_system_time";
 
     private static final String KEY_PREF_LOG = "pref_log";
     private static final String KEY_PREF_CHANGELOG = "pref_changelog";

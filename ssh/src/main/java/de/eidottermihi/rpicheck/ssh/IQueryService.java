@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016  RasPi Check Contributors
+ * Copyright (C) 2017  RasPi Check Contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,6 +111,14 @@ public interface IQueryService {
     public abstract String queryDistributionName() throws RaspiQueryException;
 
     /**
+     * Queries the current system time.
+     *
+     * @return the system time in RFC-2822 format
+     * @throws RaspiQueryException if something goes wrong
+     */
+    public abstract String querySystemtime() throws RaspiQueryException;
+
+    /**
      * Queries the running processes.
      *
      * @param showRootProcesses if processes of root should be shown
@@ -184,8 +192,9 @@ public interface IQueryService {
      * Runs the specified command.
      *
      * @param command the command to run
+     * @param timeout timeout in seconds
      * @throws RaspiQueryException when something goes wrong
      */
-    public abstract String run(String command) throws RaspiQueryException;
+    public abstract String run(String command, int timeout) throws RaspiQueryException;
 
 }

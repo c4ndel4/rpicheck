@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016  RasPi Check Contributors
+ * Copyright (C) 2017  RasPi Check Contributors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ public class CommandBean implements Serializable {
     private String name;
     private String command;
     private boolean showOutput;
+    private int timeout;
 
     public String getName() {
         return name;
@@ -63,4 +64,11 @@ public class CommandBean implements Serializable {
         this.id = id;
     }
 
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
 }

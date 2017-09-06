@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (C) 2017  RasPi Check Contributors
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+-->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
@@ -37,6 +56,14 @@
             android:key="pref_load_avg"
             android:summary="@string/pref_load_avg_summary"
             android:title="@string/pref_load_avg_title"/>
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_query_show_system_time"
+            android:summary="@string/pref_query_show_system_time_summary"
+            android:summaryOff="@string/pref_query_show_system_time_summaryOff"
+            android:summaryOn="@string/pref_query_show_system_time_summaryOn"
+            android:title="@string/pref_query_show_system_time_title"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_group_log">
         <Preference
